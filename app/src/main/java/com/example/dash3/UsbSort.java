@@ -34,6 +34,15 @@ public class UsbSort {
                 String identifier = parts[0].trim();
                 String valueStr = parts[1].trim();
 
+                // a dropped byte on the serial line can leave junk like "" or "12a" here,
+                // and an uncaught NumberFormatException on the USB thread crashes the whole app
+                try {
+                    Integer.parseInt(valueStr);
+                } catch (NumberFormatException e) {
+                    Log.w("UsbSort", "Skipping bad value: " + value);
+                    continue;
+                }
+
                 if (identifier.equals("RPM")) {             //looks for 0-3800
                     MainActivity.RPM = Integer.parseInt(valueStr);
                     if(Handling.datalog == 1  ){
