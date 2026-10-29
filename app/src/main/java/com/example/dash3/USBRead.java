@@ -45,15 +45,18 @@ public class USBRead {
                 }
 
                 port = driver.getPorts().get(0);
+                // if the cable gets bumped while opening, log it and give up instead of crashing the dash
                 try {
                     port.open(connection);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                try {
                     port.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    Log.e("USBRead", "Couldn't open USB serial port", e);
+                    try {
+                        port.close();
+                    } catch (IOException ignored) {
+                    }
+                    connection.close();
+                    return;
                 }
 
                 final int MAX_READ_ATTEMPTS = 10;
